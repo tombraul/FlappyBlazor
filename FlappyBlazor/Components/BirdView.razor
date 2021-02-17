@@ -1,0 +1,11 @@
+﻿@using FlappyBlazor.Models
+
+<div class="bird" style="@_birdCss"></div>
+
+@code {
+    
+    [Parameter] public Bird Model { get; set; }
+    
+    
+    string _birdCss => $"bottom: {Model.DistanceFromGround}px";
+}

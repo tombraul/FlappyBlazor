@@ -1,18 +1,23 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace FlappyBlazor.Models
 {
-    public class GameManager : INotifyPropertyChanged
+    public class GameManager
     {
         private readonly int _gravity = 2;
-        public Bird Bird { get; set; }
+
+        public event EventHandler MainLoopCompleted;
+        public Bird Bird { get; private set; }
+        public Pipe Pipe { get; private set; }
         public bool IsRunning { get; set; } = false;
 
         public GameManager()
         {
             Bird = new Bird();
+            Pipe = new Pipe();
         }
 
         public async void Run()
@@ -21,14 +26,14 @@ namespace FlappyBlazor.Models
             while (IsRunning)
             {
                 Bird.Fall(_gravity);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Bird)));
 
+                Pipe.Move();
+                
                 // Sorry you lost 
                 if (Bird.DistanceFromGround <= 0)
-                {
                     GameOver();
-                }
-                
+                    
+                MainLoopCompleted?.Invoke(this, EventArgs.Empty);
                 await Task.Delay(20); // lets not go with cpu speed here -> 20ms should be fine for now
             }
         }
@@ -37,6 +42,7 @@ namespace FlappyBlazor.Models
         {
             if (IsRunning) return;
             Bird = new Bird(); // Create a new instance on start
+            Pipe = new Pipe();
             Run();
         }
 
